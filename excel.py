@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from databases import Database
 from send_email import send_email
 
@@ -6,7 +7,7 @@ subject = "Email Subject"
 #body = "This is the body of the text message"
 sender = "rodriguestest1234@gmail.com"
 recipients = ["rodriguestest1234@gmail.com"]
-password = "znembbpbwsopbjvc"
+PASSWORD = os.environ.get('GMAIL_PASSWORD')
 
 def main():
     body = pd.read_excel(r'/home/adam_rodrigues/NEST259/book1.xlsx')
