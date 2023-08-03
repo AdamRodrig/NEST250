@@ -1,32 +1,38 @@
+import sqlite3
+import os
 import pandas as pd
-from databases import Database
 from send_email import send_email
+from get_hash import calculate_file_hash, check_file_for_changes
 
 subject = "Email Subject"
-#body = "This is the body of the text message"
+body = "This is the body of the text message"
 sender = "rodriguestest1234@gmail.com"
-recipients = ["rodriguestest1234@gmail.com"]
-password = "znembbpbwsopbjvc"
+password = os.environ.get("GMAIL_PASSWORD")
 
 def main():
-    body = pd.read_excel(r'/home/adam_rodrigues/NEST259/book1.xlsx')
-    if body[body.Last_Login > 5]:
-        print(body.Last_Login)
-    #body = body.to_string()
-    #send_email(subject, body, sender, recipients, password)
+
+    file_path = os.path.abspath("./Book1.xlsx")
+
+    initial_hash = calculate_file_hash(file_path)
+    stored_hash = os.environ.get("EXCEL_HASH")
+    if not stored_hash:
+        stored_hash = initial_hash
+
+    has_changed = not check_file_for_changes(file_path, stored_hash)
+
+    if has_changed:
+        print("--->The file has been changed.")
+        body = pd.read_excel(file_path)
+        value = body[body['Last_Login'] > 30]
+        for _, row in value.iterrows():
+            last_login = row['Last_Login']
+            message = f"Subject: Reminder: Your last login was {last_login} ago."
+            body = value.to_string()
+            send_email(subject, body, sender, row["Email_Address"], password)
+    else:
+        print("---> The file has not been changed.")
+        print("---> Waiting for 10s before checking again")
+    return
 
 if __name__ == '__main__':
-    print(main())
-    
-
-
-
-
-#with open('init2.sql', 'r') as sql_file:
-    #sql_script = sql_file.read()
-#conn = sqlite3.connect('test.db')
-#database = Database("sqlite:///test.sqlite")
-#cur = conn.cursor()
-#cur.executescript(sql_script)
-#cur.close()
-#conn.close()
+    main()

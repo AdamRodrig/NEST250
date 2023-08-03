@@ -1,0 +1,7 @@
+__pycache__/*
+nest259.service
+Pipfile
+Pipfile.lock
+test.db
+init.sql
+main.py
